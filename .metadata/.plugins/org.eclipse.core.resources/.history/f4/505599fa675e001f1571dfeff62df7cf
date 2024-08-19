@@ -1,0 +1,78 @@
+package dao;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+import model.ArbolHelliwell;
+
+public class ArbolHelliwellDAO {
+
+    private Connection connection;
+
+    public ArbolHelliwellDAO(Connection connection) {
+        this.connection = connection;
+    }
+
+    public void createArbolHelliwell(ArbolHelliwell arbolHelliwell) throws SQLException {
+        String query = "INSERT INTO ArbolHelliwell(ConstanteHelliwell, ValorHelliwell) VALUES (?, ?)";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setDouble(1, arbolHelliwell.getConstanteHelliwell());
+            stmt.setDouble(2, arbolHelliwell.getValorHelliwell());
+            stmt.executeUpdate();
+        }
+    }
+
+    public ArbolHelliwell getArbolHelliwellById(int ID) throws SQLException {
+        String query = "SELECT * FROM ArbolHelliwell WHERE ID = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setInt(1, ID);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    ArbolHelliwell arbolHelliwell = new ArbolHelliwell();
+                    arbolHelliwell.setConstanteHelliwell(rs.getDouble("ConstanteHelliwell"));
+                    arbolHelliwell.setValorHelliwell(rs.getDouble("ValorHelliwell"));
+                    return arbolHelliwell;
+                }
+            }
+        }
+        return null; // ArbolHelliwell no encontrado
+    }
+
+    public List<ArbolHelliwell> getAllArbolHelliwell() throws SQLException {
+        List<ArbolHelliwell> arbolesHelliwell = new ArrayList<>();
+        String query = "SELECT * FROM ArbolHelliwell";
+        try (PreparedStatement stmt = connection.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                ArbolHelliwell arbolHelliwell = new ArbolHelliwell();
+                arbolHelliwell.setConstanteHelliwell(rs.getDouble("ConstanteHelliwell"));
+                arbolHelliwell.setValorHelliwell(rs.getDouble("ValorHelliwell"));
+                arbolesHelliwell.add(arbolHelliwell);
+            }
+        }
+        return arbolesHelliwell;
+    }
+
+    public void updateArbolHelliwell(ArbolHelliwell arbolHelliwell) throws SQLException {
+        String query = "UPDATE ArbolHelliwell SET ConstanteHelliwell = ?, ValorHelliwell = ? WHERE ID = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setDouble(1, arbolHelliwell.getConstanteHelliwell());
+            stmt.setDouble(2, arbolHelliwell.getValorHelliwell());
+            stmt.setInt(3, arbolHelliwell.getID()); // Suponiendo que ArbolHelliwell tenga un ID para identificarlo
+            stmt.executeUpdate();
+        }
+    }
+
+    public void deleteArbolHelliwell(int ID) throws SQLException {
+        String query = "DELETE FROM ArbolHelliwell WHERE ID = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setInt(1, ID);
+            stmt.executeUpdate();
+        }
+    }
+}
+

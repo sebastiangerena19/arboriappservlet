@@ -1,0 +1,75 @@
+package web;
+
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import dao.ArbolCTLADAO;
+import model.ArbolCTLA;
+
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
+
+@WebServlet("/arbolctla")
+public class ArbolCTLAServlet extends HttpServlet {
+
+    private ArbolCTLADAO arbolCTLADAO;
+
+    @Override
+    public void init() throws ServletException {
+        Connection connection = (Connection) getServletContext().getAttribute("DBConnection");
+        arbolCTLADAO = new ArbolCTLADAO(connection);
+    }
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String id = request.getParameter("id");
+        try {
+            if (id != null) {
+                ArbolCTLA arbolCTLA = arbolCTLADAO.getArbolCTLById(Integer.parseInt(id));
+                request.setAttribute("arbolCTLA", arbolCTLA);
+                request.getRequestDispatcher("/verArbolCTLA.jsp").forward(request, response);
+            } else {
+                request.setAttribute("arbolesCTLA", arbolCTLADAO.getAllArbolCTLA());
+                request.getRequestDispatcher("/listarArbolesCTLA.jsp").forward(request, response);
+            }
+        } catch (SQLException e) {
+            throw new ServletException("Error al acceder a la base de datos", e);
+        }
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String action = request.getParameter("action");
+
+        try {
+            if ("create".equals(action)) {
+                double constanteCTLA = Double.parseDouble(request.getParameter("constanteCTLA"));
+                ArbolCTLA arbolCTLA = new ArbolCTLA();
+                arbolCTLA.setConstanteCTLA(constanteCTLA);
+                arbolCTLADAO.createArbolCTLA(arbolCTLA);
+                response.sendRedirect("arbolctla");
+            } else if ("update".equals(action)) {
+                int id = Integer.parseInt(request.getParameter("id"));
+                ArbolCTLA arbolCTLA = arbolCTLADAO.getArbolCTLById(id);
+                if (arbolCTLA != null) {
+                    arbolCTLA.setConstanteCTLA(Double.parseDouble(request.getParameter("constanteCTLA")));
+                    arbolCTLADAO.updateArbolCTLA(arbolCTLA);
+                }
+                response.sendRedirect("arbolctla");
+            } else if ("delete".equals(action)) {
+                int id = Integer.parseInt(request.getParameter("id"));
+                arbolCTLADAO.deleteArbolCTLA(id);
+                response.sendRedirect("arbolctla");
+            }
+        } catch (SQLException e) {
+            throw new ServletException("Error al acceder a la base de datos", e);
+        }
+    }
+}
+

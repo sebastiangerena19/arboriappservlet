@@ -1,0 +1,74 @@
+package web;
+
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import dao.AdministradorDAO;
+
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
+
+@WebServlet("/administrador")
+public class AdministradorServlet extends HttpServlet {
+
+    private AdministradorDAO administradorDAO;
+
+    @Override
+    public void init() throws ServletException {
+        Connection connection = (Connection) getServletContext().getAttribute("DBConnection");
+        administradorDAO = new AdministradorDAO(connection);
+    }
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String id = request.getParameter("id");
+        try {
+            if (id != null) {
+                Administrador administrador = administradorDAO.getAdministradorById(id);
+                request.setAttribute("administrador", administrador);
+                request.getRequestDispatcher("/verAdministrador.jsp").forward(request, response);
+            } else {
+                request.setAttribute("administradores", administradorDAO.getAllAdministradores());
+                request.getRequestDispatcher("/listarAdministradores.jsp").forward(request, response);
+            }
+        } catch (SQLException e) {
+            throw new ServletException("Error al acceder a la base de datos", e);
+        }
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String action = request.getParameter("action");
+
+        try {
+            if ("create".equals(action)) {
+                String id = request.getParameter("id");
+                Administrador administrador = new Administrador();
+                administrador.setIDdelUsuario(id);
+                administradorDAO.createAdministrador(administrador);
+                response.sendRedirect("administrador");
+            } else if ("update".equals(action)) {
+                String id = request.getParameter("id");
+                Administrador administrador = administradorDAO.getAdministradorById(id);
+                if (administrador != null) {
+                    administrador.setIDdelUsuario(id);
+                    administradorDAO.updateAdministrador(administrador);
+                }
+                response.sendRedirect("administrador");
+            } else if ("delete".equals(action)) {
+                String id = request.getParameter("id");
+                administradorDAO.deleteAdministrador(id);
+                response.sendRedirect("administrador");
+            }
+        } catch (SQLException e) {
+            throw new ServletException("Error al acceder a la base de datos", e);
+        }
+    }
+}
+
