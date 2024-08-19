@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;arboriapp/src/main/webapp/WEB_INF/jsp/Administrador.html&apos; to &apos;Administrador.jsp&apos;" description="Rename resource &apos;Administrador.html&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="src/main/webapp/WEB_INF/jsp/Administrador.html" name="Administrador.jsp" stamp="1724101210027" updateReferences="true"/>
+</session>
